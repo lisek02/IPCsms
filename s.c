@@ -23,32 +23,45 @@ typedef struct logged {
 
 int main() {
   int msgid;
+  int loop = 1;
+  int result;
   msgbuf message, messageS;
   
   
   msgid = msgget(15071410, IPC_CREAT | 0644); 
   if(msgid == -1) {
     perror("Utworzenie kolejki komunikatów");
+    exit(1);
   }
   
-  do {
-    if(msgrcv(msgid, &message, sizeof(message), 1, 0) == -1) {
-      //perror("Odbieranie elementu");
+  while(loop == 1) {
+    //memset(message.nick, 0, sizeof(message.nick));
+    //memset(messageS.type, 0, sizeof(messageS.type));
+    //memset(messageS.status, 0, sizeof(messageS.status));
+    //memset(messageS.nick, 0, sizeof(messageS.nick));    
+    
+    result = msgrcv(msgid, &message, sizeof(message), 0, 0);
+    if(result == -1) {
+      perror("Odbieranie elementu");
       exit(1);
-    }
-    printf("%s", message.nick);
-    char nick2[10];
+    } else {
+      printf("%s", message.nick);
+      char nick2[10];
+      printf("test1");
 
-    messageS.type = message.pid;
-    messageS.cmd = 1;
-    messageS.status = 0;
-    strcpy(messageS.nick, message.nick);
-    
-    if(msgsnd(msgid, &messageS, sizeof(messageS), 0) == -1) {
-      perror("Wysyłanie elementu");
+      messageS.type = message.pid;
+      messageS.cmd = 1;
+      messageS.status = 0;
+      strcpy(messageS.nick, message.nick);
+      printf("test2");
+      
+      result = msgsnd(msgid, &messageS, sizeof(messageS), 0);
+      if(result == -1) {
+	perror("Wysyłanie elementu");
+	exit(1);
+      }
     }
-    
-  } while(1);
-  
-  
+    //msgctl(msgid, IPC_RMID, 0);
+  }
+  return 0;  
 }
