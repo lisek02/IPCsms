@@ -45,15 +45,15 @@ int main() {
       perror("Odbieranie elementu");
       exit(1);
     } else {
-      printf("%s", message.nick);
+      printf("%s\n", message.nick);
       char nick2[10];
-      printf("test1");
+      printf("test1\n");
 
       messageS.type = message.pid;
       messageS.cmd = 1;
       messageS.status = 0;
       strcpy(messageS.nick, message.nick);
-      printf("test2");
+      printf("test2\n");
       
       result = msgsnd(msgid, &messageS, sizeof(messageS), 0);
       if(result == -1) {
