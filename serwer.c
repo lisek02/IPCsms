@@ -22,9 +22,21 @@ typedef struct logged {
 
 int main() {
   int msgid, result, type, loop = 1;
+  int i;
   
   msgbuf to_send, recieved;
   logged loggedArray[18];
+  
+  for(i=0; i<18; i++) {
+    loggedArray[i].pid = 0;
+    strcpy(loggedArray[i].nick, "");
+  }
+//   //test - zapełnij prawie całą tablicę
+//   for(i=0; i<15; i++) {
+//       loggedArray[i].pid = i+1;
+//   }
+  
+//   printf("test");
   
   msgid = msgget(15071410, IPC_CREAT | 0644); 
   if(msgid == -1) {
@@ -48,8 +60,8 @@ int main() {
       switch(recieved.cmd) {
 	case 1:
 	  to_send.cmd = 1;
-	  int userInArray = returnUserInArray(recieved.nick, recieved.pid);
-	  printf("User in array: %d", userInArray);
+	  int userInArray = returnUserInArray(loggedArray, recieved.nick, recieved.pid);
+// 	  printf("User in array: %d\n\n", userInArray);
 	  if(userInArray < 0) {
 	    to_send.status = abs(userInArray);
 	  } else {
@@ -57,7 +69,8 @@ int main() {
 	    strcpy(loggedArray[userInArray].nick, recieved.nick);
 	    loggedArray[userInArray].pid = recieved.pid;
 	  }
-	  printf("type: %ld, cmd: %d. status: %d\n", to_send.type, to_send.cmd, to_send.status);
+// 	  for(i=0; i<18; i++) printf("pid value: %d, nick: %s\n ", loggedArray[i].pid, loggedArray[i].nick);
+// 	  printf("type: %ld, cmd: %d. status: %d\n", to_send.type, to_send.cmd, to_send.status);
 	  break;
 	  
 	default:
@@ -79,17 +92,22 @@ int main() {
 int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {
   int toReturn = -3;
   int i;
-  for(i=17; i>=0; i++) {
-    if(sizeof(loggedArray[i]) == 0) {
-      toReturn = i;
-    } else {
-      if(loggedArray[i].nick == nick) {
+//   for(i=0; i<18; i++) printf("pid value: %d, nick: %s\n ", loggedArray[i].pid, loggedArray[i].nick);
+  for(i=0; i<18; i++) {
+//       printf("nick to insert %s\n", nick);
+      if(!strcmp(loggedArray[i].nick,nick)) {
 	if(loggedArray[i].pid == pid) {
-	  toReturn = -2;
+	  return -2;
 	}
-	else toReturn = -1;
+	return -1;
       }
+  }
+  for(i=17; i>=0; i--) {
+//     printf("%lu", sizeof(loggedArray[i]));
+    if(loggedArray[i].pid == 0) {
+      return i;
     }
   }
-  return toReturn;
+  printf("\n");
+  return -3;
 }
