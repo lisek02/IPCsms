@@ -102,8 +102,9 @@ int main() {
 			exit(1);
 		    }
 		    
-		    //receiving user list
 		    printf("Lista użytkowników: ");
+		    
+		    //receiving user list		    
 		    result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
 		    if(result == -1) {
 			perror("Odbieranie elementu");
@@ -118,9 +119,26 @@ int main() {
 		    break;
 		    
 		case 2:
-		    printf("Lista grup:\npierwsza\ndruga\ntrzecia\n");
+		    //sending request for group list
+		    to_send.cmd = 3;
+		    result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		    if(result == -1) {
+			perror("Wysyłanie elementu");
+			exit(1);
+		    }
+		    
+		    printf("Lista grup: ");
+		    
+		    //receiving group list
+		    result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		    if(result == -1) {
+			perror("Odbieranie elementu");
+		    } else {
+			printf("%s", received.text);
+		    }	
+		    
 		    do {
-			printf("Wybierz 0 aby wrócić do menu: ");
+			printf("\nWybierz 0 aby wrócić do menu: ");
 			scanf("%d", &choice2);
 		    }
 		    while(choice2 != 0);

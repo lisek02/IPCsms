@@ -20,11 +20,46 @@ typedef struct logged {
     int pid;
 } logged;
 
+typedef struct group {
+    char name[10];
+    char *users[10];
+} group;
+
 void generateUserList(logged loggedArray[18], char *text);
 
 int main() {
     int msgid, result, type, loop = 1;
-    int i;
+    int i,j;
+    group *uGroup = malloc(3 * sizeof(group));
+    //group uGroup[3];
+    strcpy(uGroup[0].name, "heheszki");
+    strcpy(uGroup[1].name, "kicioch");
+    strcpy(uGroup[2].name, "humor");
+    
+//     for(i=0; i<3; i++) {
+// 	for(j=0; j<10; j++) {
+// 	    strcpy(uGroup[i].users[j], "");
+// 	}
+//     }
+    
+    for(i=0; i<3; i++) {
+	for(j=0; j<10; j++) {
+	    printf("%s", uGroup[i].users[j]);
+	    //printf("%s", uGroup[i].users[j]);
+	}
+    }
+    
+//     FILE *config;
+//     if((config = fopen("groups.conf", "r")) == NULL) {
+// 	perror("błąd otwarcia pliku");
+//     } else {
+// 	char *buffer;
+// 	i=0;
+// 	while(fgets(buffer, 20, config) != NULL && i<3) {
+// 	    strcpy(group[i], buffer);
+// 	    i++;
+// 	}
+//     }
     
     msgbuf to_send, received;
     logged loggedArray[18];
@@ -86,7 +121,17 @@ int main() {
 		}		
 	    }
 	    printf("%s\n", to_send.text);
-	    break;	    
+	    break;
+
+	case 3:
+	    to_send.cmd = 3;
+	    strcpy(to_send.text, "");
+	    for(i=0; i<3; i++) {
+		strcat(to_send.text, uGroup[i].name);
+		strcat(to_send.text, "; ");
+	    }
+	    printf("%s\n", to_send.text);
+	    break;	 	    
 	    
 	default:
 	    printf("Something went wrong");
