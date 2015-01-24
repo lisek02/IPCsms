@@ -131,7 +131,13 @@ int main() {
 		strcat(to_send.text, "; ");
 	    }
 	    printf("%s\n", to_send.text);
-	    break;	 	    
+	    break;
+	    
+	case 4:
+	    to_send.cmd = 4;
+	    int status = setNewLogin(loggedArray, received.pid, received.nick);
+	    to_send.status = status;
+	    break;
 	    
 	default:
 	    printf("Something went wrong");
@@ -153,14 +159,14 @@ int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {
     int toReturn = -3;
     int i;
 //     for(i=0; i<18; i++) printf("pid value: %d, nick: %s\n ", loggedArray[i].pid, loggedArray[i].nick);
-	for(i=0; i<18; i++) {
+    for(i=0; i<18; i++) {
 //             printf("nick to insert %s\n", nick);
-            if(!strcmp(loggedArray[i].nick,nick)) {
-	if(loggedArray[i].pid == pid) {
-	    return -2;
-	}
+	if(!strcmp(loggedArray[i].nick,nick)) {
+	    if(loggedArray[i].pid == pid) {
+		return -2;
+	    }
 	return -1;
-            }
+	}
     }
     for(i=17; i>=0; i--) {
 //         printf("%lu", sizeof(loggedArray[i]));
@@ -170,4 +176,82 @@ int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {
     }
     printf("\n");
     return -3;
+}
+
+int setNewLogin(logged loggedArray[18], int pid, char nick[10]) {
+    int i;
+    int logged = loggedIn(loggedArray, pid, nick);
+    if(logged == 0) {
+	return 8;
+    }
+    
+//     for(i=0; i<18; i++) {
+// 	if(!strcmp(loggedArray[i].nick, nick)) {
+// 	    if(loggedArray[i].pid == pid) {
+// 		return 0;
+// 	    } else {	    
+// 		return 1;
+// 	    }
+// 	}
+//     }
+    
+//     for(i=0; i<18; i++) {
+// 	if(loggedArray[i].pid == pid) {
+// 	    strcpy(loggedArray[i].nick, nick);
+// 	    return 0;
+// 	}
+//     }
+    
+    
+    for(i=0; i<18; i++) {
+	if(!strcmp(loggedArray[i].nick, nick)) {
+	    return 1;
+	}
+    }
+    
+    for(i=0; i<18; i++) {
+	if(loggedArray[i].pid == pid) {
+	    strcpy(loggedArray[i].nick, nick);
+	    return 0;
+	}
+    }
+    
+    
+//     printf("pid: %d\n", pid);
+//     printf("nick: %s\n", nick);
+//     for(i=0; i<18; i++) {
+// 	printf("F\n");
+// 	printf("logged pid: %d\n", loggedArray[i].pid);
+// 
+// 	printf("logged nick: %s\n", loggedArray[i].nick);
+// 
+// 	if(loggedArray[i].pid == pid) {
+// 	    printf("test1\n");
+// 	    strcpy(loggedArray[i].nick, nick);
+// 	    return 0;
+// 	} else if(!strcmp(loggedArray[i].nick, nick)) {
+// 	    printf("test2\n");
+// 	    return 1;
+// 	}
+//     }
+//     return 8;
+}
+
+
+/*
+ * returns 1 if user is logged in or 0 otherwise
+ */
+int loggedIn(logged loggedArray[18], int pid, char nick[10]) {
+    int i;
+    int toReturn = 0;
+    printf("pid: %d\n", pid);
+    for(i=0; i<18; i++) {
+	printf("%d\n", loggedArray[i].pid);
+	if(loggedArray[i].pid == pid) {
+	    toReturn = 1;
+	    break;	   
+	}
+    }
+    printf("to return %d: ]n\n", toReturn);
+    return toReturn;
 }

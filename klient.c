@@ -145,8 +145,40 @@ int main() {
 		    break;
 		    
 		case 3:
+		    char new_nick[10];
+		    to_send.cmd = 4;
 		    printf("Wprowadź nową nazwę użytkownika: ");
-		    scanf("%s", nick);
+		    scanf("%s", new_nick);
+		    strcpy(to_send.nick, new_nick);
+		    
+		    //sending new nick
+		    result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		    if(result == -1) {
+			perror("Wysyłanie elementu");
+			exit(1);
+		    }
+		  
+		    result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		    if(result == -1) {
+			perror("Odbieranie elementu");
+		    } else {
+			switch(received.status) {
+			    case  0:
+				printf("Zmiana loginu zakończona powodzeniem");
+				nick = new_nick;
+				break;
+			    case 1:
+				printf("Taki login już istnieje");
+				break;
+			    case 8:
+				printf("Nie jesteś zalogowany");
+				break;
+			    default:
+				printf("Oops, coś poszło nie tak\n");
+				break;
+			}
+		    }	
+		    
 		    break;
 		    
 		case 4:
