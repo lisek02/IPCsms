@@ -36,6 +36,8 @@ int main() {
     
     to_send.type = 1;
     to_send.pid = getpid();
+    
+    strcpy(nick, "nieznajomy");
         
     //displaying menu
     while(choice1) {
@@ -181,7 +183,11 @@ int main() {
 			    break;
 		    }
 		}	
-		
+		do {
+		    printf("\nWybierz 0 aby wrócić do menu: ");
+		    scanf("%d", &choice2);
+		}
+		while(choice2 != 0);
 		break;
 		
 	    case 5:
@@ -238,12 +244,38 @@ int main() {
 		break;
 		
 	    case 10:
-		choice1 = 0;
+		//sending log out request
+		to_send.cmd = 10;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		}
+		
+		//receiving log out status	    
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    switch(received.status) {
+			case 8:
+			    printf("Nie jesteś zalogowany!");
+			    break;
+			    
+			case 0:
+			    strcpy(nick, "nieznajomy");
+			    break;
+			
+			default:
+			    printf("unknown error");
+			    break;
+		    }
+		}	
+		//choice1 = 0;
 		break;
 		
 	    case 0:
 		choice1 = 0;
-		choice = 0;
 	    default:
 		break;
 	}

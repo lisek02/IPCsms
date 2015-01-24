@@ -139,6 +139,21 @@ int main() {
 	    to_send.status = status;
 	    break;
 	    
+	case 10:
+	    to_send.cmd = 10;
+	    if(loggedIn(loggedArray, received.pid)) {
+		for(i=0; i<18; i++) {
+		    if(loggedArray[i].pid == received.pid) {
+			loggedArray[i].pid = 0;
+			strcpy(loggedArray[i].nick, "");
+		    }
+		}
+		to_send.status = 0;
+	    } else {
+		to_send.status = 8;
+	    }
+	    break;			
+	    
 	default:
 	    printf("Something went wrong");
 	    break;
@@ -180,7 +195,7 @@ int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {
 
 int setNewLogin(logged loggedArray[18], int pid, char nick[10]) {
     int i;
-    int logged = loggedIn(loggedArray, pid, nick);
+    int logged = loggedIn(loggedArray, pid);
     if(logged == 0) {
 	return 8;
     }
@@ -241,7 +256,7 @@ int setNewLogin(logged loggedArray[18], int pid, char nick[10]) {
 /*
  * returns 1 if user is logged in or 0 otherwise
  */
-int loggedIn(logged loggedArray[18], int pid, char nick[10]) {
+int loggedIn(logged loggedArray[18], int pid) {
     int i;
     int toReturn = 0;
     printf("pid: %d\n", pid);
