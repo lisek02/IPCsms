@@ -139,6 +139,8 @@ int main() {
 		
 	    case 7:
 		to_send.cmd = -1;
+		
+		//displaying chat
 		printf("chat: \n\n");
 		for(i=0; i<chatToWrite; i++) {
 		    printf("data: %s\tod: %s\t treść: %s\n", chat[i].date, chat[i].nick, chat[i].text);
@@ -181,6 +183,7 @@ int main() {
 		strcpy(to_send.date, ctime(&currTime));
 		
 		to_send.cmd = 8;
+		//sending message to a user
 		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
 		if(result == -1) {
 		    perror("Wysyłanie elementu");
@@ -219,6 +222,7 @@ int main() {
 		strcpy(to_send.date, ctime(&currTime));
 		
 		to_send.cmd = 9;
+		//sending message to group
 		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
 		if(result == -1) {
 		    perror("Wysyłanie elementu");
@@ -490,7 +494,6 @@ int main() {
 	    } while (((received.cmd == 8) || (received.cmd == 9)) && (strcmp(received.text, "")));
 	}
     }
-    
     msgctl(msgid, IPC_RMID, 0);	
 }
 
