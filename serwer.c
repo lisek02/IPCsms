@@ -1,4 +1,4 @@
-//SERWER
+#include "inf106244_s.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,28 +6,6 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <unistd.h>
-
-typedef struct msgbuf {
-    long type;
-    int cmd;
-    char nick[10];
-    char text[256];
-    char date[30];
-    int pid;
-    int status;
-} msgbuf;
-
-typedef struct logged {
-    char nick[10];
-    int pid;
-} logged;
-
-typedef struct group {
-    char name[10];
-    int users[10];
-} group;
-
-void generateUserList(logged loggedArray[18], char *text);
 
 int main() {
     int msgid, result, type, loop = 1, status;
@@ -276,7 +254,7 @@ int main() {
     return 0;
 }
 
-int translateUP(logged loggedArray[18], char nick[10], int pid) {
+int translateUP(logged loggedArray[18], char nick[10]) {
     int i;
     for(i=0; i<18; i++) {
 	if(!strcmp(loggedArray[i].nick, nick)) {
