@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <signal.h>
+#include <unistd.h>
 
 typedef struct msgbuf {
     long type;
@@ -31,12 +33,9 @@ int main() {
     int msgid, result, type, loop = 1, status;
     int i,j;
     char pidToUser[10];
+    int userToPid;
     group *uGroup = malloc(3 * sizeof(group));
-    
-//     strcpy(uGroup[0].name, "heheszki");
-//     strcpy(uGroup[1].name, "kicioch");
-//     strcpy(uGroup[2].name, "humor");
-    
+
     for(i=0; i<3; i++) {
 	for(j=0; j<10; j++) {
 	    uGroup[i].users[j] = 0;
@@ -60,10 +59,6 @@ int main() {
 	strcpy(uGroup[i].name, line);
 	i++;
     }
-   
-    for(i=0; i<3; i++) {
-	printf("%s", uGroup[i].name);
-    }
     
     msgbuf to_send, received, toSendMessage;
     logged loggedArray[18];
@@ -78,9 +73,7 @@ int main() {
         perror("Utworzenie kolejki komunikatów");
         exit(1);
     }
-    
-    printf("msgid: %d\n", msgid);
-    
+
     while(loop == 1) {
         
         result = msgrcv(msgid, &received, sizeof(received), 1, 0);
@@ -122,7 +115,6 @@ int main() {
 			strcat(to_send.text, uGroup[i].name);
 			strcat(to_send.text, "; ");
 		    }
-		    printf("%s\n", to_send.text);
 		    break;
 		    
 		case 4:
@@ -147,13 +139,7 @@ int main() {
 		    to_send.cmd = 8;
 		    
 		    //translate user to pid
-		    int userToPid;
-		    for(i=0; i<18; i++) {
-			if(!strcmp(loggedArray[i].nick, received.nick)) {
-			    userToPid = loggedArray[i].pid;
-			    break;
-			}
-		    }
+		    userToPid = translateUP(loggedArray, received.nick);
 		    
 		    //translate pid to user
 		    for(i=0; i<18; i++) {
@@ -179,7 +165,7 @@ int main() {
 				if(result == -1) {
 				    perror("Wysyłanie elementu");
 				    exit(1);
-				} else printf("wysłano odpowiedź"); 
+				}
 				
 				to_send.status = 0;
 				break;
@@ -231,7 +217,7 @@ int main() {
 					    if(result == -1) {
 						perror("Wysyłanie elementu");
 						exit(1);
-					    } else printf("wysłano odpowiedź"); 
+					    }
 					}
 				    }
 				}
@@ -269,7 +255,6 @@ int main() {
 		    break;			
 		    
 		default:
-		    printf("Something went wrong");
 		    break;
 	    }
 	}
@@ -278,9 +263,26 @@ int main() {
 	if(result == -1) {
 	    perror("Wysyłanie elementu");
 	    exit(1);
-	} else (printf("wysłano odpowiedź"));
+	}
     }
+    
+    if (raise(SIGINT) != 0) {
+        fputs("Error raising the signal.\n", stderr);
+	printf("end");
+	sleep(10);
+        return EXIT_FAILURE;
+    }
+    
     return 0;
+}
+
+int translateUP(logged loggedArray[18], char nick[10], int pid) {
+    int i;
+    for(i=0; i<18; i++) {
+	if(!strcmp(loggedArray[i].nick, nick)) {
+	    return loggedArray[i].pid;
+	}
+    }  
 }
 
 int removeFromGroup(logged loggedArray[18], group uGroup[3], char nick[10], int pid) {
@@ -346,7 +348,6 @@ int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {
             return i;
         }
     }
-    printf("\n");
     return -3;
 }
 
@@ -379,12 +380,10 @@ int loggedIn(logged loggedArray[18], int pid) {
     int i;
     int toReturn = 0;
     for(i=0; i<18; i++) {
-	printf("%d\n", loggedArray[i].pid);
 	if(loggedArray[i].pid == pid) {
 	    toReturn = 1;
 	    break;	   
 	}
     }
-    printf("to return %d: ]n\n", toReturn);
     return toReturn;
 }
