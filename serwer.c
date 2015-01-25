@@ -100,95 +100,139 @@ int main() {
 //             printf("%s", received.nick);
             to_send.type = received.pid;
             
-            switch(received.cmd) {
-	case 1:
-	    to_send.cmd = 1;
-	    int userInArray = returnUserInArray(loggedArray, received.nick, received.pid);
-// 	    printf("User in array: %d\n\n", userInArray);
-	    if(userInArray < 0) {
-	        to_send.status = abs(userInArray);
-	    } else {
-	        to_send.status = 0;
-	        strcpy(loggedArray[userInArray].nick, received.nick);
-	        loggedArray[userInArray].pid = received.pid;
-	    }
-// 	    for(i=0; i<18; i++) printf("pid value: %d, nick: %s\n ", loggedArray[i].pid, loggedArray[i].nick);
-// 	    printf("type: %ld, cmd: %d. status: %d\n", to_send.type, to_send.cmd, to_send.status);
-	    break;
-	    
-	case 2:
-// 	    printf("weszło w case 2\n");
-	    to_send.cmd = 2;
-	    strcpy(to_send.text, "");
-	    for(i=0; i<18; i++) {
-		if(strcmp(loggedArray[i].nick, "")) {
-		    strcat(to_send.text, loggedArray[i].nick);
-		    strcat(to_send.text, "; ");
-		}		
-	    }
-	    printf("%s\n", to_send.text);
-	    break;
-
-	case 3:
-	    to_send.cmd = 3;
-	    strcpy(to_send.text, "");
-	    for(i=0; i<3; i++) {
-		strcat(to_send.text, uGroup[i].name);
-		strcat(to_send.text, "; ");
-	    }
-	    printf("%s\n", to_send.text);
-	    break;
-	    
-	case 4:
-	    to_send.cmd = 4;
-	    status = setNewLogin(loggedArray, received.pid, received.nick);
-	    to_send.status = status;
-	    break;
-	    
-	case 5:
-	    to_send.cmd = 5;
-	    status = addToGroup(loggedArray, uGroup, received.nick, received.pid);
-	    to_send.status = status;
-	    break;
-	    
-	case 10:
-	    to_send.cmd = 10;
-	    if(loggedIn(loggedArray, received.pid)) {
-		for(i=0; i<18; i++) {
-		    if(loggedArray[i].pid == received.pid) {		//delete user
-			loggedArray[i].pid = 0;
-			strcpy(loggedArray[i].nick, "");
-		    }
+        switch(received.cmd) {
+	    case 1:
+		to_send.cmd = 1;
+		int userInArray = returnUserInArray(loggedArray, received.nick, received.pid);
+    // 	    printf("User in array: %d\n\n", userInArray);
+		if(userInArray < 0) {
+		    to_send.status = abs(userInArray);
+		} else {
+		    to_send.status = 0;
+		    strcpy(loggedArray[userInArray].nick, received.nick);
+		    loggedArray[userInArray].pid = received.pid;
 		}
+    // 	    for(i=0; i<18; i++) printf("pid value: %d, nick: %s\n ", loggedArray[i].pid, loggedArray[i].nick);
+    // 	    printf("type: %ld, cmd: %d. status: %d\n", to_send.type, to_send.cmd, to_send.status);
+		break;
 		
-		for(i=0; i<3; i++) {					//delete from group
+	    case 2:
+    // 	    printf("weszło w case 2\n");
+		to_send.cmd = 2;
+		strcpy(to_send.text, "");
+		for(i=0; i<18; i++) {
+		    if(strcmp(loggedArray[i].nick, "")) {
+			strcat(to_send.text, loggedArray[i].nick);
+			strcat(to_send.text, "; ");
+		    }		
+		}
+		printf("%s\n", to_send.text);
+		break;
+
+	    case 3:
+		to_send.cmd = 3;
+		strcpy(to_send.text, "");
+		for(i=0; i<3; i++) {
+		    strcat(to_send.text, uGroup[i].name);
+		    strcat(to_send.text, "; ");
+		}
+		printf("%s\n", to_send.text);
+		break;
+		
+	    case 4:
+		to_send.cmd = 4;
+		status = setNewLogin(loggedArray, received.pid, received.nick);
+		to_send.status = status;
+		break;
+		
+	    case 5:
+		to_send.cmd = 5;
+		status = addToGroup(loggedArray, uGroup, received.nick, received.pid);
+		to_send.status = status;
+		break;
+		
+	    case 6:
+		to_send.cmd = 6;
+
+		for(i=0; i<3; i++) {
 		    for(j=0; j<10; j++) {
-			if(uGroup[i].users[j] == received.pid) {	
-			    uGroup[i].users[j] = 0;
+			printf("%d\t", uGroup[i].users[j]);
+		    }
+		    printf("\n");
+		}
+		printf("\n");
+		
+		status = removeFromGroup(loggedArray, uGroup, received.nick, received.pid);
+		
+		for(i=0; i<3; i++) {
+		    for(j=0; j<10; j++) {
+			printf("%d\t", uGroup[i].users[j]);
+		    }
+		    printf("\n");
+		}	 
+		
+		to_send.status = status;
+		break;
+		
+	    case 10:
+		to_send.cmd = 10;
+		if(loggedIn(loggedArray, received.pid)) {
+		    for(i=0; i<18; i++) {
+			if(loggedArray[i].pid == received.pid) {		//delete user
+			    loggedArray[i].pid = 0;
+			    strcpy(loggedArray[i].nick, "");
 			}
 		    }
+		    
+		    for(i=0; i<3; i++) {					//delete from group
+			for(j=0; j<10; j++) {
+			    if(uGroup[i].users[j] == received.pid) {	
+				uGroup[i].users[j] = 0;
+			    }
+			}
+		    }
+		    
+		    to_send.status = 0;
+		} else {
+		    to_send.status = 8;
 		}
+		break;			
 		
-		to_send.status = 0;
-	    } else {
-		to_send.status = 8;
+	    default:
+		printf("Something went wrong");
+		break;
+		}
 	    }
-	    break;			
 	    
-	default:
-	    printf("Something went wrong");
-	    break;
-            }
-        }
-        
-        result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
-        if(result == -1) {
-            perror("Wysyłanie elementu");
-            exit(1);
-        } else (printf("wysłano odpowiedź"));
-    }
+	    result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+	    if(result == -1) {
+		perror("Wysyłanie elementu");
+		exit(1);
+	    } else (printf("wysłano odpowiedź"));
+	}
     
     return 0;
+}
+
+int removeFromGroup(logged loggedArray[18], group uGroup[3], char nick[10], int pid) {
+    int i,j;
+    int logged = loggedIn(loggedArray, pid);
+    if(logged == 1) {
+	for(i=0; i<3; i++) {
+	    if(!strcmp(uGroup[i].name, nick)) {
+		for(j=0; j<10; j++) {
+		    if(uGroup[i].users[j] == pid) {
+			uGroup[i].users[j] = 0;
+			return 0;
+		    }
+		}
+		return 6;
+	    }
+	}
+	return 5;
+    } else {
+	return 8;
+    }
 }
 
 int addToGroup(logged loggedArray[18], group uGroup[3], char nick[10], int pid) {
@@ -306,7 +350,7 @@ int setNewLogin(logged loggedArray[18], int pid, char nick[10]) {
 int loggedIn(logged loggedArray[18], int pid) {
     int i;
     int toReturn = 0;
-    printf("pid: %d\n", pid);
+    //printf("pid: %d\n", pid);
     for(i=0; i<18; i++) {
 	printf("%d\n", loggedArray[i].pid);
 	if(loggedArray[i].pid == pid) {

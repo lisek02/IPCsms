@@ -246,6 +246,47 @@ int main() {
 		printf("Wybierz grupę z której chcesz się wypisać: %s; %s; %s\n", group[0], group[1], group[2]);
 		scanf("%s", groupChoice);
 		strcpy(to_send.nick, groupChoice);
+		
+		//sending request for adding to a group
+		to_send.cmd = 6;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		}
+		
+		//receiving group list
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    switch(received.status) {
+			case 0:
+			    printf("Pomyślnie usunięto z grupy\n");
+			    break;
+			    
+			case 5:
+			    printf("Grupa nie istnieje\n");
+			    break;
+			    
+			case 6:
+			    printf("Nie jesteś zapisany do tej grupy\n");
+			    break;
+			    
+			case 8:
+			    printf("Nie jesteś zalogowany\n");
+			    break;
+			    
+			default:
+			    printf("Oops, coś poszło nie tak\n");
+			    break;
+		    }    
+		}
+		do {
+		    printf("\nWybierz 0 aby wrócić do menu: ");
+		    scanf("%d", &choice2);
+		}
+		while(choice2 != 0);
 		break;
 		
 	    case 7:
