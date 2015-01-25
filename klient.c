@@ -36,7 +36,8 @@ int main() {
     
     int chatToWrite = 0;
     message chat[10];
-
+    time_t currTime;
+    
     msgid = msgget(15071410, IPC_CREAT | 0644); 
     if(msgid == -1) {
         perror("Utworzenie kolejki komunikatów");
@@ -176,7 +177,7 @@ int main() {
 		printf("Podaj wiadomość: ");
 		scanf("%s", to_send.text);
 		
-		time_t currTime = time(NULL);
+		currTime = time(NULL);
 		strcpy(to_send.date, ctime(&currTime));
 		
 		to_send.cmd = 8;
@@ -190,19 +191,41 @@ int main() {
 		break;
 
 	    case 9:
-// 		printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
-// 		scanf("%s", groupChoice);
-// 		strcpy(to_send.nick, groupChoice);
-// 		
-// 		printf("Podaj wiadomość: ");
-// 		scanf("%s", text);
-// 		printf("Wiadomość została wysłana!\n");
-// 		do {
-// 		    printf("Wybierz 0 aby wrócić do menu: ");
-// 		    scanf("%d", &choice2);
-// 		}
-// 		while(choice2 != 0);
-// 		break;
+		//sending request for group list
+		to_send.cmd = 3;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		}
+		
+		printf("Lista grup: ");
+		
+		//receiving group list		    
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    printf("%s", received.text);
+		}
+		
+		printf("\nWybierz grupę do której chcesz wysłać wiadomość: ");
+		scanf("%s", to_send.nick);
+				
+		printf("Podaj wiadomość: ");
+		scanf("%s", to_send.text);
+		
+		currTime = time(NULL);
+		strcpy(to_send.date, ctime(&currTime));
+		
+		to_send.cmd = 9;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		} else {
+		    
+		}		
 		break;
 	    
 	    case 10:
@@ -230,7 +253,7 @@ int main() {
 		if(result == -1) {
 		    perror("Odbieranie elementu");
 		} else {
-		    if((received.cmd == 8) && (strcmp(received.text, ""))) {
+		    if(((received.cmd == 8) || (received.cmd == 9)) && (strcmp(received.text, ""))) {
 			strcpy(chat[chatToWrite].text, received.text);
 			strcpy(chat[chatToWrite].date, received.date);
 			strcpy(chat[chatToWrite].nick, received.nick);
@@ -384,7 +407,6 @@ int main() {
 				switch(received.status) {
 				    case 0:
 					printf("Wiadomość została wysłana!\n");    
-
 					break;
 					
 				    case 7:
@@ -408,20 +430,35 @@ int main() {
 				break;
 
 			    case 9:
-	// 			printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
-	// 			scanf("%s", groupChoice);
-	// 			strcpy(to_send.nick, groupChoice);
-	// 			
-	// 			printf("Podaj wiadomość: ");
-	// 			scanf("%s", text);
-	// 			printf("Wiadomość została wysłana!\n");
-	// 			do {
-	// 			    printf("Wybierz 0 aby wrócić do menu: ");
-	// 			    scanf("%d", &choice2);
-	// 			}
-	// 			while(choice2 != 0);
-	// 			break;
-			    
+				switch(received.status) {
+				    case 0:
+					printf("Wiadomość została wysłana!\n");    
+					break;
+					
+				    case 5:
+					printf("Nie istnieje taka grupa\n");
+					break;
+					
+				    case 6:
+					printf("Nie jesteś w grupie\n");
+					break;
+					
+				    case 8:
+					printf("Nie jesteś zalogowany!\n");
+					break;
+				    
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}
+
+				do {
+				    printf("Wybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+
 			    case 10:
 				switch(received.status) {
 				    case 8:
@@ -450,7 +487,7 @@ int main() {
 			}
 		    }
 		}
-	    } while ((received.cmd == 8) && (strcmp(received.text, "")));
+	    } while (((received.cmd == 8) || (received.cmd == 9)) && (strcmp(received.text, "")));
 	}
     }
     

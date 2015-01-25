@@ -30,6 +30,7 @@ void generateUserList(logged loggedArray[18], char *text);
 int main() {
     int msgid, result, type, loop = 1, status;
     int i,j;
+    char pidToUser[10];
     group *uGroup = malloc(3 * sizeof(group));
     
     strcpy(uGroup[0].name, "heheszki");
@@ -63,7 +64,7 @@ int main() {
 // 	}
 //     }
     
-    msgbuf to_send, received;
+    msgbuf to_send, received, toSendMessage;
     logged loggedArray[18];
     
     for(i=0; i<18; i++) {
@@ -187,7 +188,6 @@ int main() {
 		}
 		
 		//translate pid to user
-		char pidToUser[10];
 		for(i=0; i<18; i++) {
 		    if(loggedArray[i].pid == received.pid) {
 			strcpy(pidToUser, loggedArray[i].nick);
@@ -196,8 +196,7 @@ int main() {
 		}
 		
 		strcpy(to_send.text, "");
-		
-		msgbuf toSendMessage;
+;
 		toSendMessage.type = userToPid;
 		toSendMessage.cmd = 8;
 		strcpy(toSendMessage.text, received.text);
@@ -222,6 +221,61 @@ int main() {
 		    to_send.status = 8;
 		}
 		break;		
+		
+	    case 9:
+		to_send.cmd = 9;
+		
+		int proceed = 0;
+		//translate pid to user];
+		for(i=0; i<18; i++) {
+		    if(loggedArray[i].pid == received.pid) {
+			strcpy(pidToUser, loggedArray[i].nick);
+			break;
+		    }
+		}
+		
+		strcpy(to_send.text, "");
+		
+		toSendMessage.cmd = 9;
+		strcpy(toSendMessage.text, received.text);
+		strcpy(toSendMessage.date, received.date);
+		strcpy(toSendMessage.nick, pidToUser);		
+		
+		if(loggedIn(loggedArray, received.pid)) {
+		    for(i=0; i<3; i++) {
+			to_send.status = 5;
+			printf("tutaj1\n");
+			if(!strcmp(uGroup[i].name, received.nick)) {
+			    printf("tutaj2\n");
+			    to_send.status = 6;
+			    for(j=0; j<10; j++) {
+				if(uGroup[i].users[j] == received.pid) {
+				    printf("tutaj3\n");
+				    proceed = 1;
+				    to_send.status = 0;
+				    break;
+				}
+			    }
+			    if(proceed == 1) {
+				for(j=0; j<10; j++) {
+				    if(uGroup[i].users[j] != 0) {
+					toSendMessage.type = uGroup[i].users[j];
+					result = msgsnd(msgid, &toSendMessage, sizeof(toSendMessage), 0);
+					if(result == -1) {
+					    perror("Wysyłanie elementu");
+					    exit(1);
+					} else printf("wysłano odpowiedź"); 
+				    }
+				}
+			    }
+			    break;
+			}
+		    }
+		 } else {
+		     to_send.status = 8;
+		 }
+		 break;
+		
 		
 	    case 10:
 		to_send.cmd = 10;
