@@ -195,6 +195,8 @@ int main() {
 		    }
 		}
 		
+		strcpy(to_send.text, "");
+		
 		msgbuf toSendMessage;
 		toSendMessage.type = userToPid;
 		toSendMessage.cmd = 8;

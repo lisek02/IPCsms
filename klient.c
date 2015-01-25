@@ -5,6 +5,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct msgbuf{
     long type;
@@ -52,7 +53,7 @@ int main() {
     //displaying menu
     while(choice1) {
 	system("clear");
-	printf("Witaj %s! Oto Twoje możliwości:\n1. zaloguj się\n2. wyświetl użytkowników\n3. wyświetl grupy\n4. zmień nazwę użytkownika\n5. zapisz się do grupy\n6. wypisz się z grupy\n7. wyświetl czat\n8. wyślij wiadomość prywatną\n9. wyślij wiadomość do grupy\n10. odbierz wiadomosci\n11. wyloguj się\n0. zakończ\nWybierz jedną: ", nick);
+	printf("Witaj %s! Oto Twoje możliwości:\n1. zaloguj się\n2. wyświetl użytkowników\n3. wyświetl grupy\n4. zmień nazwę użytkownika\n5. zapisz się do grupy\n6. wypisz się z grupy\n7. wyświetl czat\n8. wyślij wiadomość prywatną\n9. wyślij wiadomość do grupy\n10. wyloguj się\n0. zakończ\nWybierz jedną: ", nick);
 	scanf("%d", &choice1);
 	printf("\n");
 	
@@ -138,9 +139,9 @@ int main() {
 	    case 7:
 		to_send.cmd = -1;
 		printf("chat: \n\n");
-		for(i=0; i< chatToWrite; i++) {
+		for(i=0; i<chatToWrite; i++) {
 		    printf("data: %s\tod: %s\t treść: %s\n", chat[i].date, chat[i].nick, chat[i].text);
-		    printf("\n\n");
+		    printf("\n");
 		}
 
 		do {
@@ -169,11 +170,14 @@ int main() {
 		    printf("%s", received.text);
 		}
 		
-		printf("\nWybierz użytkownika do którego chcesz wysłać wiadomość:");
+		printf("\nWybierz użytkownika do którego chcesz wysłać wiadomość: ");
 		scanf("%s", to_send.nick);
 				
 		printf("Podaj wiadomość: ");
 		scanf("%s", to_send.text);
+		
+		time_t currTime = time(NULL);
+		strcpy(to_send.date, ctime(&currTime));
 		
 		to_send.cmd = 8;
 		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
@@ -200,21 +204,8 @@ int main() {
 // 		while(choice2 != 0);
 // 		break;
 		break;
-		
-	    case 10:
-// 		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-// 		if(result == -1) {
-// 		    perror("Odbieranie elementu");
-// 		} else {
-// 		    if(!strcmp(received.text, "")) {
-// 			printf("pusty .text");
-// 		    } else {
-// 			printf("%s", received.text);
-// 		    }
-// 		}
-		break;
 	    
-	    case 11:
+	    case 10:
 		//sending log out request
 		to_send.cmd = 10;
 		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
@@ -222,30 +213,10 @@ int main() {
 		    perror("Wysyłanie elementu");
 		    exit(1);
 		}
-		
-		//receiving log out status	    
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    switch(received.status) {
-			case 8:
-			    printf("Nie jesteś zalogowany!");
-			    break;
-			    
-			case 0:
-			    strcpy(nick, "nieznajomy");
-			    break;
-			
-			default:
-			    printf("Oops, coś poszło nie tak\n");
-			    break;
-		    }
-		}	
-		//choice1 = 0;
 		break;
 		
 	    case 0:
+		to_send.cmd = -1;
 		choice1 = 0;
 		break;
 	    default:
@@ -259,8 +230,12 @@ int main() {
 		if(result == -1) {
 		    perror("Odbieranie elementu");
 		} else {
-		    if(received.type != getpid()) {
-			//save to messages
+		    if((received.cmd == 8) && (strcmp(received.text, ""))) {
+			strcpy(chat[chatToWrite].text, received.text);
+			strcpy(chat[chatToWrite].date, received.date);
+			strcpy(chat[chatToWrite].nick, received.nick);
+			chatToWrite++;
+			printf("ODEBRANO WIADOMOŚĆ!\n\n");
 		    } else {
 			switch(received.cmd) {
 			    case 1:
@@ -446,35 +421,36 @@ int main() {
 	// 			}
 	// 			while(choice2 != 0);
 	// 			break;
-				
-			    case 10:
-				if(!strcmp(received.text, "")) {
-				    printf("pusty .text");
-				} else {
-				    printf("%s", received.text);
-				}
 			    
-			    case 11:
-				    switch(received.status) {
-					case 8:
-					    printf("Nie jesteś zalogowany!");
-					    break;
-					    
-					case 0:
-					    strcpy(nick, "nieznajomy");
-					    break;
+			    case 10:
+				switch(received.status) {
+				    case 8:
+					printf("Nie jesteś zalogowany!\n");
+					break;
 					
-					default:
-					    printf("Oops, coś poszło nie tak\n");
-					    break;
-				    };
+				    case 0:
+					strcpy(nick, "nieznajomy");
+					printf("Wylogowano poprawnie\n");
+					break;
+				    
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}
+				
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
 				break;
+				
 			    default:
 				break;
 			}
 		    }
 		}
-	    } while (received.type != getpid());
+	    } while ((received.cmd == 8) && (strcmp(received.text, "")));
 	}
     }
     
