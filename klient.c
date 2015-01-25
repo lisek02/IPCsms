@@ -16,16 +16,25 @@ typedef struct msgbuf{
     int status;
 } msgbuf;
 
+typedef struct message {
+    char nick[10];
+    char date[30];
+    char text[256];
+} message;
+
 void displayUserList(int *msgid, msgbuf *to_send, msgbuf *received, int *result);
 
 int main() {
-    int msgid, result, condition;
+    int msgid, result, condition, i;
     char nick[10], new_nick[10];
     char text[256];
     
     int choice = 1, choice1 = 1, choice2 = 1;
     char groupChoice[10];
     const char *group[3] = {"heheszki", "kicioch", "humor"};
+    
+    int chatToWrite = 0;
+    message chat[10];
 
     msgid = msgget(15071410, IPC_CREAT | 0644); 
     if(msgid == -1) {
@@ -290,7 +299,12 @@ int main() {
 		break;
 		
 	    case 7:
-		printf("Czat:\ndata: 18.01.2014\tod: nieznajomy\t treść: elo elo\n");
+		printf("chat: \n\n");
+		for(i=0; i< chatToWrite; i++) {
+		    printf("data: %s\tod: %s\t treść: %s\n", chat[i].date, chat[i].nick, chat[i].text);
+		    printf("\n\n");
+		}
+
 		do {
 		    printf("Wybierz 0 aby wrócić do menu: ");
 		    scanf("%d", &choice2);
