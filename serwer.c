@@ -126,7 +126,7 @@ int main() {
 			strcat(to_send.text, "; ");
 		    }		
 		}
-		printf("%s\n", to_send.text);
+		//printf("%s\n", to_send.text);
 		break;
 
 	    case 3:

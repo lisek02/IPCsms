@@ -59,56 +59,20 @@ int main() {
 	switch(choice1) {
 	    
 	    case 1:
-		do {
-		    printf("Witaj! Podaj swoją nazwę użytkownika: ");
-		    scanf("%s", nick);
-		    strcpy(to_send.nick, nick);
-		    
-		    to_send.cmd = 1;
-		    
-		    //sending username
-		    result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
-		    if(result == -1) {
-			perror("Wysyłanie elementu");
-			exit(1);
-		    }
-		    
-		    //response after sending username
-		    result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		    if(result == -1) {
-			perror("Odbieranie elementu");
-		    } else {
-			condition = received.status;
-			switch(condition) {
-			    case 0:
-				printf("Wszystko ok\n");
-				break;
-			    case 1:
-				printf("Taki nick już istnieje\n");
-				break;
-			    case 2:
-				printf("Jesteś już zalogowany\n");
-				condition = 0;
-				break;
-			    case 3:
-				printf("Maksymalna liczba użytkowników. Wpisz 0 aby wyjść\n");
-				scanf("%d", &choice2);
-				if(choice2 == 0) choice = 0;	        
-				condition = 0;
-				choice1 = 0;
-				break;
-			    default:
-				printf("Oops, coś poszło nie tak\n");
-				break;
-			}
-		    }
-		} while (condition != 0);
-		do {
-		    printf("\nWybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		} while(choice2 != 0);
+		printf("Witaj! Podaj swoją nazwę użytkownika: ");
+		scanf("%s", nick);
+		strcpy(to_send.nick, nick);
+		
+		to_send.cmd = 1;
+		
+		//sending username
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		}
 		break;
-    
+		
 	    case 2:    
 		//sending request for user list
 		to_send.cmd = 2;
@@ -117,21 +81,6 @@ int main() {
 		    perror("Wysyłanie elementu");
 		    exit(1);
 		}
-		
-		printf("Lista użytkowników: ");
-		
-		//receiving user list		    
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    printf("%s", received.text);
-		}		    
-		do {
-		    printf("\nWybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
 		break;
 		
 	    case 3:
@@ -142,22 +91,6 @@ int main() {
 		    perror("Wysyłanie elementu");
 		    exit(1);
 		}
-		
-		printf("Lista grup: ");
-		
-		//receiving group list
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    printf("%s", received.text);
-		}	
-		
-		do {
-		    printf("\nWybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
 		break;
 		
 	    case 4:
@@ -172,32 +105,6 @@ int main() {
 		    perror("Wysyłanie elementu");
 		    exit(1);
 		}
-		
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    switch(received.status) {
-			case  0:
-			    printf("Zmiana loginu zakończona powodzeniem");
-			    strcpy(nick, new_nick);
-			    break;
-			case 1:
-			    printf("Taki login już istnieje");
-			    break;
-			case 8:
-			    printf("Nie jesteś zalogowany");
-			    break;
-			default:
-			    printf("Oops, coś poszło nie tak\n");
-			    break;
-		    }
-		}	
-		do {
-		    printf("\nWybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
 		break;
 		
 	    case 5:
@@ -212,43 +119,6 @@ int main() {
 		    perror("Wysyłanie elementu");
 		    exit(1);
 		}
-		
-		//receiving group list
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    switch(received.status) {
-			case 0:
-			    printf("Pomyślnie zapisano go grupy\n");
-			    break;
-			    
-			case 3:
-			    printf("Nie ma miejsc w grupie\n");
-			    break;
-			    
-			case 4:
-			    printf("Jesteś już zapisany do tej grupy\n");
-			    break;
-			    
-			case 5:
-			    printf("Grupa nie istnieje\n");
-			    break;
-			    
-			case 8:
-			    printf("Nie jesteś zalogowany\n");
-			    break;
-			    
-			default:
-			    printf("Oops, coś poszło nie tak\n");
-			    break;
-		    }    
-		}
-		do {
-		    printf("\nWybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
 		break;
 		
 	    case 6:
@@ -263,42 +133,10 @@ int main() {
 		    perror("Wysyłanie elementu");
 		    exit(1);
 		}
-		
-		//receiving group list
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    switch(received.status) {
-			case 0:
-			    printf("Pomyślnie usunięto z grupy\n");
-			    break;
-			    
-			case 5:
-			    printf("Grupa nie istnieje\n");
-			    break;
-			    
-			case 6:
-			    printf("Nie jesteś zapisany do tej grupy\n");
-			    break;
-			    
-			case 8:
-			    printf("Nie jesteś zalogowany\n");
-			    break;
-			    
-			default:
-			    printf("Oops, coś poszło nie tak\n");
-			    break;
-		    }    
-		}
-		do {
-		    printf("\nWybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
 		break;
 		
 	    case 7:
+		to_send.cmd = -1;
 		printf("chat: \n\n");
 		for(i=0; i< chatToWrite; i++) {
 		    printf("data: %s\tod: %s\t treść: %s\n", chat[i].date, chat[i].nick, chat[i].text);
@@ -345,63 +183,36 @@ int main() {
 		} else {
 		    
 		}		
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    switch(received.status) {
-			case 0:
-			    printf("Wiadomość została wysłana!\n");    
-
-			    break;
-			    
-			case 7:
-			    printf("Nie istnieje taki użytkownik\n");
-			    break;
-			    
-			case 8:
-			    printf("Nie jesteś zalogowany!\n");
-			    break;
-			
-			default:
-			    printf("Oops, coś poszło nie tak\n");
-			    break;
-		    }
-		}   
-
-		do {
-		    printf("Wybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
 		break;
 
 	    case 9:
-		printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
-		scanf("%s", groupChoice);
-		strcpy(to_send.nick, groupChoice);
-		
-		printf("Podaj wiadomość: ");
-		scanf("%s", text);
-		printf("Wiadomość została wysłana!\n");
-		do {
-		    printf("Wybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
+// 		printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
+// 		scanf("%s", groupChoice);
+// 		strcpy(to_send.nick, groupChoice);
+// 		
+// 		printf("Podaj wiadomość: ");
+// 		scanf("%s", text);
+// 		printf("Wiadomość została wysłana!\n");
+// 		do {
+// 		    printf("Wybierz 0 aby wrócić do menu: ");
+// 		    scanf("%d", &choice2);
+// 		}
+// 		while(choice2 != 0);
+// 		break;
 		break;
 		
 	    case 10:
-		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
-		if(result == -1) {
-		    perror("Odbieranie elementu");
-		} else {
-		    if(!strcmp(received.text, "")) {
-			printf("pusty .text");
-		    } else {
-			printf("%s", received.text);
-		    }
-		}	
+// 		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+// 		if(result == -1) {
+// 		    perror("Odbieranie elementu");
+// 		} else {
+// 		    if(!strcmp(received.text, "")) {
+// 			printf("pusty .text");
+// 		    } else {
+// 			printf("%s", received.text);
+// 		    }
+// 		}
+		break;
 	    
 	    case 11:
 		//sending log out request
@@ -436,8 +247,234 @@ int main() {
 		
 	    case 0:
 		choice1 = 0;
+		break;
 	    default:
 		break;
+	}
+	
+	//receive status
+	if(to_send.cmd >= 0) {
+	    do {
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    if(received.type != getpid()) {
+			//save to messages
+		    } else {
+			switch(received.cmd) {
+			    case 1:
+				condition = received.status;
+				switch(condition) {
+				    case 0:
+					printf("Wszystko ok\n");
+					break;
+				    case 1:
+					printf("Taki nick już istnieje\n");
+					break;
+				    case 2:
+					printf("Jesteś już zalogowany\n");
+					condition = 0;
+					break;
+				    case 3:
+					printf("Maksymalna liczba użytkowników. Wpisz 0 aby wyjść\n");
+					scanf("%d", &choice2);
+					if(choice2 == 0) choice = 0;	        
+					condition = 0;
+					choice1 = 0;
+					break;
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}
+				
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				} while(choice2 != 0);
+				
+				break;
+		    
+			    case 2:    
+				//receiving user list
+				printf("Lista użytkowników: \n");
+				printf("%s", received.text);
+				
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+				
+			    case 3:
+				//receiving group list
+				printf("Lista grup: ");
+				printf("%s", received.text);
+
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+				
+			    case 4:
+				switch(received.status) {
+				    case  0:
+					printf("Zmiana loginu zakończona powodzeniem");
+					strcpy(nick, new_nick);
+					break;
+				    case 1:
+					printf("Taki login już istnieje");
+					break;
+				    case 8:
+					printf("Nie jesteś zalogowany");
+					break;
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}
+		
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+				
+			    case 5:
+				switch(received.status) {
+				    case 0:
+					printf("Pomyślnie zapisano go grupy\n");
+					break;
+					
+				    case 3:
+					printf("Nie ma miejsc w grupie\n");
+					break;
+					
+				    case 4:
+					printf("Jesteś już zapisany do tej grupy\n");
+					break;
+					
+				    case 5:
+					printf("Grupa nie istnieje\n");
+					break;
+					
+				    case 8:
+					printf("Nie jesteś zalogowany\n");
+					break;
+					
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}    
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+				
+			    case 6:
+				switch(received.status) {
+				    case 0:
+					printf("Pomyślnie usunięto z grupy\n");
+					break;
+					
+				    case 5:
+					printf("Grupa nie istnieje\n");
+					break;
+					
+				    case 6:
+					printf("Nie jesteś zapisany do tej grupy\n");
+					break;
+					
+				    case 8:
+					printf("Nie jesteś zalogowany\n");
+					break;
+					
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}    
+				do {
+				    printf("\nWybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+				
+			    case 8:
+				switch(received.status) {
+				    case 0:
+					printf("Wiadomość została wysłana!\n");    
+
+					break;
+					
+				    case 7:
+					printf("Nie istnieje taki użytkownik\n");
+					break;
+					
+				    case 8:
+					printf("Nie jesteś zalogowany!\n");
+					break;
+				    
+				    default:
+					printf("Oops, coś poszło nie tak\n");
+					break;
+				}
+
+				do {
+				    printf("Wybierz 0 aby wrócić do menu: ");
+				    scanf("%d", &choice2);
+				}
+				while(choice2 != 0);
+				break;
+
+			    case 9:
+	// 			printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
+	// 			scanf("%s", groupChoice);
+	// 			strcpy(to_send.nick, groupChoice);
+	// 			
+	// 			printf("Podaj wiadomość: ");
+	// 			scanf("%s", text);
+	// 			printf("Wiadomość została wysłana!\n");
+	// 			do {
+	// 			    printf("Wybierz 0 aby wrócić do menu: ");
+	// 			    scanf("%d", &choice2);
+	// 			}
+	// 			while(choice2 != 0);
+	// 			break;
+				
+			    case 10:
+				if(!strcmp(received.text, "")) {
+				    printf("pusty .text");
+				} else {
+				    printf("%s", received.text);
+				}
+			    
+			    case 11:
+				    switch(received.status) {
+					case 8:
+					    printf("Nie jesteś zalogowany!");
+					    break;
+					    
+					case 0:
+					    strcpy(nick, "nieznajomy");
+					    break;
+					
+					default:
+					    printf("Oops, coś poszło nie tak\n");
+					    break;
+				    };
+				break;
+			    default:
+				break;
+			}
+		    }
+		}
+	    } while (received.type != getpid());
 	}
     }
     
