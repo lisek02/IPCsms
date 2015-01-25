@@ -52,7 +52,7 @@ int main() {
     //displaying menu
     while(choice1) {
 	system("clear");
-	printf("Witaj %s! Oto Twoje możliwości:\n1. zaloguj się\n2. wyświetl użytkowników\n3. wyświetl grupy\n4. zmień nazwę użytkownika\n5. zapisz się do grupy\n6. wypisz się z grupy\n7. wyświetl czat\n8. wyślij wiadomość do grupy\n9. wyślij wiadomość prywatną\n10. wyloguj się\n0. zakończ\nWybierz jedną: ", nick);
+	printf("Witaj %s! Oto Twoje możliwości:\n1. zaloguj się\n2. wyświetl użytkowników\n3. wyświetl grupy\n4. zmień nazwę użytkownika\n5. zapisz się do grupy\n6. wypisz się z grupy\n7. wyświetl czat\n8. wyślij wiadomość prywatną\n9. wyślij wiadomość do grupy\n10. odbierz wiadomosci\n11. wyloguj się\n0. zakończ\nWybierz jedną: ", nick);
 	scanf("%d", &choice1);
 	printf("\n");
 	
@@ -313,6 +313,70 @@ int main() {
 		break;
 		
 	    case 8:
+		//sending request for user list
+		to_send.cmd = 2;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		}
+		
+		printf("Lista użytkowników: ");
+		
+		//receiving user list		    
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    printf("%s", received.text);
+		}
+		
+		printf("\nWybierz użytkownika do którego chcesz wysłać wiadomość:");
+		scanf("%s", to_send.nick);
+				
+		printf("Podaj wiadomość: ");
+		scanf("%s", to_send.text);
+		
+		to_send.cmd = 8;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		} else {
+		    
+		}		
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    switch(received.status) {
+			case 0:
+			    printf("Wiadomość została wysłana!\n");    
+
+			    break;
+			    
+			case 7:
+			    printf("Nie istnieje taki użytkownik\n");
+			    break;
+			    
+			case 8:
+			    printf("Nie jesteś zalogowany!\n");
+			    break;
+			
+			default:
+			    printf("Oops, coś poszło nie tak\n");
+			    break;
+		    }
+		}   
+
+		do {
+		    printf("Wybierz 0 aby wrócić do menu: ");
+		    scanf("%d", &choice2);
+		}
+		while(choice2 != 0);
+		break;
+
+	    case 9:
 		printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
 		scanf("%s", groupChoice);
 		strcpy(to_send.nick, groupChoice);
@@ -327,22 +391,19 @@ int main() {
 		while(choice2 != 0);
 		break;
 		
-	    case 9:
-// 		printf("Wybierz użytkownika do którego chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
-// 		do {
-// 		    scanf("%d", &groupChoice);
-// 		} while (groupChoice != 1 && groupChoice != 2 && groupChoice != 3);
-		printf("Podaj wiadomość: ");
-		scanf("%s", text);
-		printf("Wiadomość została wysłana!\n");
-		do {
-		    printf("Wybierz 0 aby wrócić do menu: ");
-		    scanf("%d", &choice2);
-		}
-		while(choice2 != 0);
-		break;
-		
 	    case 10:
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    if(!strcmp(received.text, "")) {
+			printf("pusty .text");
+		    } else {
+			printf("%s", received.text);
+		    }
+		}	
+	    
+	    case 11:
 		//sending log out request
 		to_send.cmd = 10;
 		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
