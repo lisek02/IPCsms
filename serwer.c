@@ -22,32 +22,34 @@ typedef struct logged {
 
 typedef struct group {
     char name[10];
-    char *users[10];
+    int users[10];
 } group;
 
 void generateUserList(logged loggedArray[18], char *text);
 
 int main() {
-    int msgid, result, type, loop = 1;
+    int msgid, result, type, loop = 1, status;
     int i,j;
     group *uGroup = malloc(3 * sizeof(group));
-    //group uGroup[3];
+    
     strcpy(uGroup[0].name, "heheszki");
     strcpy(uGroup[1].name, "kicioch");
     strcpy(uGroup[2].name, "humor");
     
+    for(i=0; i<3; i++) {
+	for(j=0; j<10; j++) {
+	    uGroup[i].users[j] = 0;
+	}
+    }
+    
 //     for(i=0; i<3; i++) {
 // 	for(j=0; j<10; j++) {
-// 	    strcpy(uGroup[i].users[j], "");
+// 	    printf("%s", uGroup[i].users[j]);
+// 	    //printf("%s", uGroup[i].users[j]);
 // 	}
 //     }
     
-    for(i=0; i<3; i++) {
-	for(j=0; j<10; j++) {
-	    printf("%s", uGroup[i].users[j]);
-	    //printf("%s", uGroup[i].users[j]);
-	}
-    }
+    
     
 //     FILE *config;
 //     if((config = fopen("groups.conf", "r")) == NULL) {
@@ -74,6 +76,10 @@ int main() {
 //     }
     
 //     printf("test");
+
+//     for(i=0; i<9; i++) {
+// 	uGroup[1].users[i] = i+1;
+//     }
     
     msgid = msgget(15071410, IPC_CREAT | 0644); 
     if(msgid == -1) {
@@ -135,7 +141,13 @@ int main() {
 	    
 	case 4:
 	    to_send.cmd = 4;
-	    int status = setNewLogin(loggedArray, received.pid, received.nick);
+	    status = setNewLogin(loggedArray, received.pid, received.nick);
+	    to_send.status = status;
+	    break;
+	    
+	case 5:
+	    to_send.cmd = 5;
+	    status = addToGroup(loggedArray, uGroup, received.nick, received.pid);
 	    to_send.status = status;
 	    break;
 	    
@@ -143,11 +155,20 @@ int main() {
 	    to_send.cmd = 10;
 	    if(loggedIn(loggedArray, received.pid)) {
 		for(i=0; i<18; i++) {
-		    if(loggedArray[i].pid == received.pid) {
+		    if(loggedArray[i].pid == received.pid) {		//delete user
 			loggedArray[i].pid = 0;
 			strcpy(loggedArray[i].nick, "");
 		    }
 		}
+		
+		for(i=0; i<3; i++) {					//delete from group
+		    for(j=0; j<10; j++) {
+			if(uGroup[i].users[j] == received.pid) {	
+			    uGroup[i].users[j] = 0;
+			}
+		    }
+		}
+		
 		to_send.status = 0;
 	    } else {
 		to_send.status = 8;
@@ -168,6 +189,32 @@ int main() {
     }
     
     return 0;
+}
+
+int addToGroup(logged loggedArray[18], group uGroup[3], char nick[10], int pid) {
+    int i,j;
+    int logged = loggedIn(loggedArray, pid);
+    if(logged == 1) {
+	for(i=0; i<3; i++) {
+	    if(!strcmp(uGroup[i].name, nick)) {		//find proper group
+		for(j=0; j<10; j++) {
+		    if(uGroup[i].users[j] == pid) {	//check if user is already in this group
+			return 4;
+		    }
+		}
+		for(j=0; j<10; j++) {
+		    if(uGroup[i].users[j] == 0) {			//find empty space in group
+			uGroup[i].users[j] = pid;
+			return 0;
+		    }
+		}
+		return 3;
+	    }
+	}
+	return 5;
+    } else {
+	return 8;
+    }
 }
 
 int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {

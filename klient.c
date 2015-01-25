@@ -23,8 +23,9 @@ int main() {
     char nick[10], new_nick[10];
     char text[256];
     
-    int choice = 1, choice1 = 1, choice2 = 1, groupChoice;
-    const char *group[3] = {"pierwsza", "druga", "trzecia"};
+    int choice = 1, choice1 = 1, choice2 = 1;
+    char groupChoice[10];
+    const char *group[3] = {"heheszki", "kicioch", "humor"};
 
     msgid = msgget(15071410, IPC_CREAT | 0644); 
     if(msgid == -1) {
@@ -191,17 +192,60 @@ int main() {
 		break;
 		
 	    case 5:
-		printf("Wybierz grupę do które chcesz się zapisać:\n1. %s\n2. %s\n3. %s\n", group[0], group[1], group[2]);
+		printf("Wybierz grupę do której chcesz się zapisać: %s; %s; %s\n", group[0], group[1], group[2]);
+		scanf("%s", groupChoice);
+		strcpy(to_send.nick, groupChoice);
+		
+		//sending request for adding to a group
+		to_send.cmd = 5;
+		result = msgsnd(msgid, &to_send, sizeof(to_send), 0);
+		if(result == -1) {
+		    perror("Wysyłanie elementu");
+		    exit(1);
+		}
+		
+		//receiving group list
+		result = msgrcv(msgid, &received, sizeof(received), getpid(), 0);
+		if(result == -1) {
+		    perror("Odbieranie elementu");
+		} else {
+		    switch(received.status) {
+			case 0:
+			    printf("Pomyślnie zapisano go grupy\n");
+			    break;
+			    
+			case 3:
+			    printf("Nie ma miejsc w grupie\n");
+			    break;
+			    
+			case 4:
+			    printf("Jesteś już zapisany do tej grupy\n");
+			    break;
+			    
+			case 5:
+			    printf("Grupa nie istnieje\n");
+			    break;
+			    
+			case 8:
+			    printf("Nie jesteś zalogowany\n");
+			    break;
+			    
+			default:
+			    printf("Oops, coś poszło nie tak\n");
+			    break;
+		    }    
+		}
 		do {
-		    scanf("%d", &groupChoice);
-		} while (groupChoice != 1 && groupChoice != 2 && groupChoice != 3);
+		    printf("\nWybierz 0 aby wrócić do menu: ");
+		    scanf("%d", &choice2);
+		}
+		while(choice2 != 0);
 		break;
 		
 	    case 6:
-		printf("Wybierz grupę z której chcesz się wypisać:\n1. %s\n2. %s\n3. %s\n", group[0], group[1], group[2]);
-		do {
-		    scanf("%d", &groupChoice);
-		} while (groupChoice != 1 && groupChoice != 2 && groupChoice != 3);
+		printf("Wybierz grupę z której chcesz się wypisać: %s; %s; %s\n", group[0], group[1], group[2]);
+		scanf("%s", groupChoice);
+		strcpy(to_send.nick, groupChoice);
 		break;
 		
 	    case 7:
@@ -214,10 +258,10 @@ int main() {
 		break;
 		
 	    case 8:
-		printf("Wybierz grupę do której chcesz wysłać wiadomość:\n1. %s\n2. %s\n3. %s\n", group[0], group[1], group[2]);
-		do {
-		    scanf("%d", &groupChoice);
-		} while (groupChoice != 1 && groupChoice != 2 && groupChoice != 3);
+		printf("Wybierz grupę do której chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
+		scanf("%s", groupChoice);
+		strcpy(to_send.nick, groupChoice);
+		
 		printf("Podaj wiadomość: ");
 		scanf("%s", text);
 		printf("Wiadomość została wysłana!\n");
@@ -229,10 +273,10 @@ int main() {
 		break;
 		
 	    case 9:
-		printf("Wybierz użytkownika do którego chcesz wysłać wiadomość:\n1. %s\n2. %s\n3. %s\n", group[0], group[1], group[2]);
-		do {
-		    scanf("%d", &groupChoice);
-		} while (groupChoice != 1 && groupChoice != 2 && groupChoice != 3);
+// 		printf("Wybierz użytkownika do którego chcesz wysłać wiadomość: %s; %s; %s\n", group[0], group[1], group[2]);
+// 		do {
+// 		    scanf("%d", &groupChoice);
+// 		} while (groupChoice != 1 && groupChoice != 2 && groupChoice != 3);
 		printf("Podaj wiadomość: ");
 		scanf("%s", text);
 		printf("Wiadomość została wysłana!\n");
@@ -267,7 +311,7 @@ int main() {
 			    break;
 			
 			default:
-			    printf("unknown error");
+			    printf("Oops, coś poszło nie tak\n");
 			    break;
 		    }
 		}	
