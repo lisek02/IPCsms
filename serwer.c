@@ -33,27 +33,37 @@ int main() {
     char pidToUser[10];
     group *uGroup = malloc(3 * sizeof(group));
     
-    strcpy(uGroup[0].name, "heheszki");
-    strcpy(uGroup[1].name, "kicioch");
-    strcpy(uGroup[2].name, "humor");
+//     strcpy(uGroup[0].name, "heheszki");
+//     strcpy(uGroup[1].name, "kicioch");
+//     strcpy(uGroup[2].name, "humor");
     
     for(i=0; i<3; i++) {
 	for(j=0; j<10; j++) {
 	    uGroup[i].users[j] = 0;
 	}
     }  
+
+    FILE *config;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    i=0;
     
-//     FILE *config;
-//     if((config = fopen("groups.conf", "r")) == NULL) {
-// 	perror("błąd otwarcia pliku");
-//     } else {
-// 	char *buffer;
-// 	i=0;
-// 	while(fgets(buffer, 20, config) != NULL && i<3) {
-// 	    strcpy(group[i], buffer);
-// 	    i++;
-// 	}
-//     }
+    config = fopen("groups.conf", "r");
+    if (config == NULL)
+	exit(EXIT_FAILURE);
+
+    while ((read = getline(&line, &len, config)) != -1) {
+	if(line[read-1] == '\n') {
+	    line[read-1] = '\0';
+	}
+	strcpy(uGroup[i].name, line);
+	i++;
+    }
+   
+    for(i=0; i<3; i++) {
+	printf("%s", uGroup[i].name);
+    }
     
     msgbuf to_send, received, toSendMessage;
     logged loggedArray[18];

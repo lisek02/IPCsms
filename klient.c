@@ -32,7 +32,27 @@ int main() {
     
     int choice = 1, choice1 = 1, choice2 = 1;
     char groupChoice[10];
-    const char *group[3] = {"heheszki", "kicioch", "humor"};
+
+    char *group[3];
+
+    FILE *config;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    i=0;
+    
+    config = fopen("groups.conf", "r");
+    if (config == NULL)
+	exit(EXIT_FAILURE);
+
+    while ((read = getline(&line, &len, config)) != -1) {
+	if(line[read-1] == '\n') {
+	    line[read-1] = '\0';
+	}
+	group[i] = (char*) malloc(10*sizeof(char));
+	strcpy(group[i], line);
+	i++;
+    }
     
     int chatToWrite = 0;
     message chat[10];
