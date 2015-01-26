@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 int main() {
-    int msgid, result, type, loop = 1, status;
+    int msgid, result, loop = 1, status;
     int i,j;
     char pidToUser[10];
     int userToPid;
@@ -261,6 +261,7 @@ int translateUP(logged loggedArray[18], char nick[10]) {
 	    return loggedArray[i].pid;
 	}
     }  
+    return 0;
 }
 
 int removeFromGroup(logged loggedArray[18], group uGroup[3], char nick[10], int pid) {
@@ -311,7 +312,6 @@ int addToGroup(logged loggedArray[18], group uGroup[3], char nick[10], int pid) 
 }
 
 int returnUserInArray(logged loggedArray[18], char nick[10], int pid) {
-    int toReturn = -3;
     int i;
     for(i=0; i<18; i++) {
 	if(!strcmp(loggedArray[i].nick,nick)) {
@@ -348,8 +348,8 @@ int setNewLogin(logged loggedArray[18], int pid, char nick[10]) {
 	    return 0;
 	}
     }
+    return 0;
 }
-
 
 /*
  * returns 1 if user is logged in or 0 otherwise

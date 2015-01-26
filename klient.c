@@ -6,13 +6,14 @@
 #include <sys/msg.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 int main() {
     int msgid, result, condition, i;
     char nick[10], new_nick[10];
-    char text[256];
     
-    int choice = 1, choice1 = 1, choice2 = 1;
+    int choice1 = 1, choice2 = 1;
     char groupChoice[10];
 
     char *group[3];
@@ -282,8 +283,7 @@ int main() {
 					break;
 				    case 3:
 					printf("Maksymalna liczba użytkowników. Wpisz 0 aby wyjść\n");
-					scanf("%d", &choice2);
-					if(choice2 == 0) choice = 0;	        
+					scanf("%d", &choice2);        
 					condition = 0;
 					choice1 = 0;
 					break;
@@ -496,7 +496,7 @@ int main() {
 	    } while (((received.cmd == 8) || (received.cmd == 9)) && (strcmp(received.text, "")));
 	}
     }
-    msgctl(msgid, IPC_RMID, 0);	
+    return 0;
 }
 
 void displayUserList(int *msgid, msgbuf *to_send, msgbuf *received, int *result) {
